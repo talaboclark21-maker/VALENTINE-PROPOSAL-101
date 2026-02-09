@@ -60,7 +60,7 @@ noBtn.addEventListener("mouseover", () => {
 // YES is clicked
 
 yesBtn.addEventListener("click", () => {
-    title.textContent = "Yippeeee!";
+    title.textContent = "Yay! I love you my love <3";
 
     catImg.src = "cat_dance.gif";
 
@@ -70,3 +70,51 @@ yesBtn.addEventListener("click", () => {
 
     finalText.style.display = "block";
 });
+
+// Background music is handled by the hidden YouTube embed in the HTML.
+// The iframe uses autoplay=1&mute=1&loop=1 to play in the background continuously.
+
+// --- YouTube IFrame API player setup (autoplay muted, unmute on first user click) ---
+let ytPlayer = null;
+
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('yt-player', {
+        height: '0',
+        width: '0',
+        videoId: 'gDlp7Oji95k',
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            loop: 1,
+            playlist: 'gDlp7Oji95k',
+            modestbranding: 1
+        },
+        events: {
+            onReady: function(e){
+                try{ e.target.mute(); e.target.playVideo(); }catch(err){}
+            }
+        }
+    });
+}
+
+// Unmute on first user click; if player isn't ready yet, retry a few times.
+function setupUnmuteOnFirstClick(){
+    function handler(){
+        let attempts = 0;
+        function tryUnmute(){
+            attempts++;
+            if(ytPlayer && typeof ytPlayer.unMute === 'function'){
+                try{ ytPlayer.unMute(); ytPlayer.setVolume(70); }catch(e){}
+            }else if(attempts < 10){
+                setTimeout(tryUnmute, 200);
+            }
+        }
+        tryUnmute();
+        document.removeEventListener('click', handler);
+    }
+    document.addEventListener('click', handler, {once: true});
+}
+
+// Install the unmute handler as soon as the page script runs.
+setupUnmuteOnFirstClick();
